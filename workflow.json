@@ -1,0 +1,42 @@
+{
+  "Comment": "Image Processing Capstone Workflow",
+  "StartAt": "ResizeImage",
+  "States": {
+    "ResizeImage": {
+      "Type": "Task",
+      "Resource": "PASTE_YOUR_LAMBDA_ARN_HERE",
+      "Parameters": {
+        "key.$": "$.key"
+      },
+      "Next": "CheckSuccess",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "ProcessingFailed"
+        }
+      ]
+    },
+    "CheckSuccess": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.status",
+          "StringEquals": "success",
+          "Next": "ProcessingSucceeded"
+        }
+      ],
+      "Default": "ProcessingFailed"
+    },
+    "ProcessingSucceeded": {
+      "Type": "Succeed",
+      "Comment": "The image was successfully resized and uploaded."
+    },
+    "ProcessingFailed": {
+      "Type": "Fail",
+      "Cause": "The Lambda function returned a failure status or crashed.",
+      "Error": "ImageProcessingFailed"
+    }
+  }
+}
